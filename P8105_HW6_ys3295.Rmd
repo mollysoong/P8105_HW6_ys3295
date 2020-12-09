@@ -159,7 +159,14 @@ birthweight = read_csv("./data/birthweight.csv") %>%
 sum(is.na(birthweight))
 ```
 
-I convert the babysex, malform, frace and mrace from numberic to factor and check for the missing value. There is no missing value in this dataset.
+I convert the babysex, malform, frace and mrace from numberic to factor and check for the missing value and there is no missing value in this dataset.
+
+```{r}
+birthweight %>% 
+  ggplot(aes(x = bwt)) + 
+  geom_histogram()
+```
+For the outcome variable, the above plot shows that the birthweight is about normally distributed, so we will use linear regression.
 
 **Model Regression**
 ```{r}
@@ -181,20 +188,18 @@ birthweight %>%
 
 Modeling Process:
 
-I use bhead(baby's head circumference at birth (cm)), blength(baby's length at birth(cm)), delwt(mother's weight at delivery(pounds)), gaweeks(gestational age in weeks) as predictors and use lm method to build this model_0.
+* I use bhead(baby's head circumference at birth (cm)), blength(baby's length at birth(cm)), delwt(mother's weight at delivery(pounds)), gaweeks(gestational age in weeks) as predictors and use lm method to build this model_0.
 
-The model is 
-
+* The model is 
 $$bwt = -6249.5+135.8*bhead+79.145*blength+2.0*delwt+14.2*gaweeks$$ 
-We could see all the predictors are significant.
 
-Also, I create a plot of model residuals against fittes values. From this graph, we see a heavy cluster in the lower right corner , with a tail fanning out to the top left. This is not necessarily what we want to see in this plot (which is a random scatter). That means this model is not so good. 
+* We could see all the predictors are significant.Also, I create a plot of model residuals against fitted values. From this figure, we can see a heavy cluster in the lower right corner , with a tail fanning out to the top left. This is not necessarily what we want to see in this plot (which is a random scatter). Therefore,this model is not that good. 
 
-## Compare Models
+### Compare Models
 
 **Cross Validation**
 
-Should write 3 functions about 3 way to build models.
+Writing 3 functions about 3 way to build models.
 ```{r}
 btw_model_0 = function(df){
   lm(bwt ~ bhead + blength + delwt + gaweeks, data = df)
@@ -236,9 +241,9 @@ cv_bwt =
 
 ```
 
-## Visualization
+### Visualization
 
-The plot below shows the distribution of RMSE values for each candidate model.
+The plot below shows the distribution of RMSE values for the candidate models.
 ```{r}
 cv_bwt %>% 
   select(starts_with("rmse")) %>% 
@@ -256,7 +261,7 @@ cv_bwt %>%
     y = "Root Mean of Square Error")
 ```
 
-From the violin plot, we can find that the model(model 1) using length at birth and gestational age as predictors (main effects only) has the highest rmse, which means it doesn`t fit well for test set. And the model (model 2) using head circumference, length, sex, and all interactions has the second highest rmse which is totally lower than that in model main effects only. Finally, the model 0 seems like has the lowest rmse and it is better than the other two models.
+* From the violin plot, we can find that the model(model 1) using length at birth and gestational age as predictors (main effects only) has the highest rmse, which means it doesn`t fit well for test set.The model (model 2) using head circumference, length, sex, and all interactions has the second highest rmse, which is totally lower than that in model main effects only. Meanwhile, the model 0 seems like has the lowest rmse which means it is better than the other two models.
 
 # Problem 3
 Load the data.
@@ -288,15 +293,15 @@ bootstraps =
   unnest(results1, results2)
 ```
 
-**About r squared**
+**For R Squared**
 ```{r}
 #The distribution of r-squared
 bootstraps %>% 
   ggplot(aes(x = r.squared)) + 
   geom_density() + 
   labs(
-    title = "Distribution Plot of the Estimate of r squared)",
-    x = "Estimate of r squared",
+    title = "Distribution Plot of the Estimation of R Squared)",
+    x = "Estimation of R Squared",
     y = "Density",
     caption = "Data: 2017 Central Park weather data"
   ) + 
@@ -306,11 +311,9 @@ r_squared = pull(bootstraps,r.squared)
 ci_of_r2 = quantile(r_squared,c(0.025, 0.975))
 ```
 
-From the distribution plot of R square, we may find it is close to a normal distribution, and the black line is the mean.
+* From the distribution plot of R square, we may find it is close to a normal distribution, and the black line is the mean.And the 95% confidence interval for r-squared is [`r ci_of_r2`].
 
-And the 95% confidence interval for r-squared is [`r ci_of_r2`].
-
-**About log(beta0 x beta1)**
+**For log(beta0 x beta1)**
 ```{r}
 beta = 
   bootstraps %>% 
@@ -332,7 +335,7 @@ beta %>%
   ggplot(aes(x = logb0_b1)) + 
   geom_density() + 
   labs(
-    title = "Distribution Plot of the Estimate of log(beta0_hat * beta1_hat)",
+    title = "Distribution Plot of the Estimation of log(beta0_hat * beta1_hat)",
     x = "Estimate of log(beta0_hat * beta1_hat)",
     y = "Density",
     caption = "Data: 2017 Central Park weather data "
@@ -341,9 +344,7 @@ beta %>%
 
 ci_of_log = quantile(pull(beta,logb0_b1),c(0.025, 0.975))
 ```
-We may find it is also close to a normal distribution, and the black line is the mean. 
-
-We could see the 95% confidence interval for log(beta0*beta1) is [`r ci_of_log`].
+* We find it is close to a normal distribution, and the black line is the mean.And the 95% confidence interval for log(beta0*beta1) is [`r ci_of_log`].
 
 
 
